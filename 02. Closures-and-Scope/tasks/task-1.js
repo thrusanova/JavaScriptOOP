@@ -126,7 +126,7 @@ function solve() {
 			return book;
 		}
 
-		function listCategories() {
+		function listCategories(category) {
 			var cat=[];
 			Array.prototype.push.apply(cat,Object.keys(categories));
 			return cat;
