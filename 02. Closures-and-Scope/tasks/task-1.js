@@ -26,10 +26,11 @@ function solve() {
 		var categories = [];
 		function listBooks(arg) {
 			if(arguments.length>0){
-				if(typeof categories[arg.category]){
-				return typeof categories[arg.category]!=='undefined' ?
-				categories[arg.category].book:[] ;
-				}
+		  if(typeof parameter.category !== 'undefined') {
+                    return typeof categories[parameter.category] !== 'undefined' ?
+                        categories[parameter.category].books : [];
+                }
+
 				if(typeof arg.author!=='undefined'){
 					var booksToList=[],
 					len=books.length;
@@ -43,39 +44,7 @@ function solve() {
 			}
 			return books;
 		}
-		function checkBook(book,expectedParams){
-			if(Object.keys(book).length!==expectedParams){
-				throw 'Some of the parameters is missing!';
-			}
-			for(var param in book){
-				if(typeof book[param]==='undefined'){
-					throw param +' cannot be undefined';
-				}
-			}
-		}
-		function validateAuthor(author){
-			if(author.trim()===''){
-				throw 'Ivalid author!';
-			}
-		}
-
-		function validateIsbn(isbn){
-			if(isbn.length!=10 && isbn.length!=13){
-				throw 'ISBN must be either 10 or 13 digits.';
-			}
-			for (var i = 0; i < isbn.length; i+=1) {
-				if(!Number(isbn[i])){
-					throw "ISBN must be valid number!";	
-				}
-				break;			
-			}
-		}
-
-		function validateTitle(title){
-			if(title.length<2 || title.length>100){
-				throw "Title must be between 2 or 100 symbols";
-			}
-		}
+		
 		function parameterAlreadyExists(name,type){
 			for (var i = 0; i < books.length; i+=1) {
 			if(books[i][type]==name){
@@ -84,32 +53,75 @@ function solve() {
 			}
 			return false;
 		}
+		
 		function bookAlreadyExists(param){
-			throw "A book with the same "+ param+" already exists!";
+			throw new Error("A book with the same "+ param+" already exists!");
 		}
-		     function addCategory(name) {
+							     
+		function addCategory(name) {
             categories[name] = {
                 books: [],
-                ID: categories.length + 1
+                id: categories.length + 1
             };
-}
+		}
+		
+		function checkBook(book,expectedParams){
+			if(Object.keys(book).length!==expectedParams){
+				throw new Error('Some of the parameters is missing!');
+			}
+			for(var param in book){
+				if(typeof book[param]==='undefined'){
+					throw new Error( param +' cannot be undefined');
+				}
+			}
+		}
+		
+		function validateAuthor(author){
+			if(author.trim()===''){
+				throw new Error('Ivalid author!');
+			}
+		}
+		
+		function validateIsbn(isbn) {
+            if(isbn.length !== 10 && isbn.length !== 13) {
+                throw new Error('ISBN must be either 10 or 13 digits');
+            }
+			
+				if(!/^[0-9]+$/.test(isbn.toString())) {
+					throw new Error('ISBN must be a valid number');
+				}
+        }
+
+		function validateTitle(title){
+			if(title.length<2 || title.length>100){
+				throw new Error( "Title must be between 2 or 100 symbols");
+			}
+		}
+
 		function addBook(book) {
 			book.ID = books.length + 1;
+			
 			checkBook(book,5);
+			
 			if(parameterAlreadyExists(book.title,'title')) {
 				bookAlreadyExists('title');
 			}
+			
 			if(parameterAlreadyExists(book.isbn,'isbn')){
 				bookAlreadyExists('ISBN');
 			}
+			
 			if(categories.indexOf(book.category)<0){
 				addCategory(book.category);
 			}
+			
 			validateAuthor(book.author);
 			validateIsbn(book.isbn);
 			validateTitle(book.title);
 			validateTitle(book.category);
-			categories[book.category].book.push(book);
+			
+			categories[book.category].books.push(book);
+			
 			books.push(book);
 			return book;
 		}
