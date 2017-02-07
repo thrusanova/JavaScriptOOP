@@ -119,14 +119,14 @@ function solve() {
     return true;
   }
 
-  function validatePresentations(presentations){
-       if (presentations.length === 0 || presentations.some(function(item) {
+ function validatePresentations(array) {
+        if (array.length === 0 || array.some(function(item) {
                 return !validateTitle(item);
             })) {
             return false;
-          }
-          return true;
-  }
+        }
+        return true;
+}
 function validatexamResult(results) {
         var i,
             j,
@@ -183,11 +183,4 @@ function validatexamResult(results) {
 	return Course;
 }
 
-
-
-var test = solve();
-var testCourse = test.init('Course title', ['p1', 'p2', 'p3']);
-testCourse.addStudent('Ivan Ivanov');
-console.log(testCourse.students);
-console.log(testCourse.getAllStudents());
 module.exports = solve;
