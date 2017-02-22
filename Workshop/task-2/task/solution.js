@@ -15,365 +15,266 @@ function solve() {
         NOT_ENOUGH_MANA: 'Not enough mana!',
         TARGET_NOT_FOUND: 'Target not found!',
         INVALID_BATTLE_PARTICIPANT: 'Battle participants must be ArmyUnit-like!',
-        INVALID_ALIGNMENT: 'Alignment must be good, neutral or evil!'
+		INVALID_ALIGNMENT: 'Alignment must be good, neutral or evil!',
     };
-
-    const validator = {
-        validateName(name) {
-            const invalidType = typeof name !== 'string';
-                
-            if(invalidType) {
-                throw new Error(ERROR_MESSAGES.INVALID_NAME_TYPE);
-            }
-
-            validator.validateRange(name.length, 2, 20, ERROR_MESSAGES.INVALID_NAME_LENGTH);
-
-            const invalidSymbols = /[^a-zA-Z ]/.test(name);
-
-            if(invalidSymbols) {
-                throw new Error(ERROR_MESSAGES.INVALID_NAME_SYMBOLS);
-            }
-        },
-        validateMana(manaValue) {
-            const invalidType = isNaN(manaValue),
-                invalidRange = manaValue < 0;
-
-            if (invalidType || invalidRange) {
-                throw new Error(ERROR_MESSAGES.INVALID_MANA);
-            }
-        },
-        validateAlignment(alignment) {
-            const invalidAlignment = ['good', 'neutral', 'evil'].indexOf(alignment) === -1;
-
-            if (invalidAlignment) {
-                throw new Error(ERROR_MESSAGES.INVALID_ALIGNMENT);
-            }
-        },
-        validateRange(value, min, max, message) {
-            
-            if ((value < min) || (max < value)) {
-                throw new Error(message);
-            }
-        },
-        validateEffect(effect) {
-            const invalidType = typeof effect !== 'function';
-
-            if (invalidType || (effect.length !== 1)) {
-                throw new Error(ERROR_MESSAGES.INVALID_EFFECT);
-            }
-        },
-        validateNonNull(value, message) {
-            if (value == null) {
-                throw new Error(message);
-            }
-        },
-        validateCastManaCost(mana, manaCost) {
-            if (mana < manaCost) {
-                throw new Error(ERROR_MESSAGES.NOT_ENOUGH_MANA);
-            }
-        },
-        validateBattleUnit(unit, message) {
-            const invalidDamage = isNaN(unit.damage),
-                invalidHealth = isNaN(unit.health),
-                invalidCount = isNaN(unit.count);
-
-            if(invalidDamage || invalidCount || invalidHealth) {
-                throw new Error(message);
-            }
-        }
-    };
-
-    function *getIdGenerator() {
-        let id = 0;
-
-		while(true) {
-			id += 1;
-			yield id;
-		}
+		const getNextId = (function(){
+		var count=0;
+		return function(){
+			count+=1;
+			return count;
+		};
+	})();
+const VALIDATOR={
+ isString(str){
+    if(typeof str !== 'string'){
+        throw  Errore(ERROR_MESSAGES.INVALID_NAME_TYPE);
     }
+},
+isValidDamage(number){
+	 if(typeof number!== 'number' || number<=0 || number>=100){
+        throw  Error(ERROR_MESSAGES.INVALID_DAMAGE);
+    }
+},
+isValidHealth(number){
+	 if(typeof number!== 'number' || number<=0 || number>200){
+        throw  Error(ERROR_MESSAGES.INVALID_HEALTH);
+    }
+},
+isValidCount(number){
+	 if(typeof number!== 'number' || number<0){
+        throw  Error(ERROR_MESSAGES.INVALID_HEALTH);
+    }
+},
+isValidSpeed(number){
+	 if(typeof number!== 'number' || number<0 || number>100){
+        throw  Error(ERROR_MESSAGES.INVALID_SPEED);
+    }
+},
+isLengthInRange(str){
+    if(str.length<2 || str.length>20){
+        throw  Error(ERROR_MESSAGES.INVALID_NAME_LENGTH)
+    }
+},
+isContainValidSymbol(str){
+    if(str.match(/[^a-zA-Z ]/)){
+        throw  Error(ERROR_MESSAGES.INVALID_NAME_SYMBOLS);
+    }
+},
+isPositiveNumber(number){
+    if(typeof str!== 'number' || str<0){
+        throw  Error(ERROR_MESSAGES.INVALID_MANA);
+    }
+},
+isNotValidAlignmet(str){
+	if(str!== 'good' && str !== 'neutral' && str !=='evil'){
+		throw Error(ERROR_MESSAGES.INVALID_ALIGNMENT);
+	}
+},
+isValidEffect(func)
+{
+    if(typeof func !== 'function' || func !== 1){
+        throw  Error(ERROR_MESSAGES.INVALID_EFFECT);
+    }
+}}
+  class Spell{
+      constructor(name,manaCost,effect){
+          this.name=name,
+          this.manaCost=manaCost,
+          this.effect=effect;
+      }
+      get name(){          
+          return this._name;
+      }
+      set name(name){
+          VALIDATOR.isString(name),
+          VALIDATOR.isLengthInRange(name);
+          VALIDATOR.isContainValidSymbol(name);
+          this._name=name;
+      }
+        get manaCost(){
+          return this._manaCost;
+      }
+      set manaCost(manaCost){
+          VALIDATOR.isPositiveNumber(manaCost);
+          this._manaCost=manaCost;
+      }
+        get effect(){
+          return this.effect;
+      }
+      set effect(effect){
+          VALIDATOR.isValidEffect(effect);
+          this.effect=effect;
+      }
+  }
+  class Unit{
+	constructor(name,alignment){
+	  this.name=name,
+	  this.alignment=alignment
+	}
+	   get name(){          
+          return this._name;
+      }
+      set name(name){
+          VALIDATOR.isString(name),
+          VALIDATOR.isLengthInRange(name);
+          VALIDATOR.isContainValidSymbol(name);
+          this._name=name;
+      }
+	   get alignment(){
+          return this.alignment;
+      }
+      set alignment(alignment){
+          VALIDATOR.isNotValidAlignmet(alignment);
+          this._alignment=alignment;
+      }	
+  }
+  class ArmyUnit extends Unit{
+	constructor(name,alignment,damage,health,count,speed){
+		super(name,alignment);
+		this._id=getNextId();
+		this.damage=damage;
+		this.health=health;
+		this.count=count;
+		this.speed=speed;
+	}
+	get id(){
+		return this._id;
+	}
+	get damage(){
+		return this._damage;
+	}
+	set damage(damage){
+		VALIDATOR.isValidDamage(damage);
+		this._damage=damage;
+	}
+	get health(){
+		return this._damage;
+	}
+	set health(health){
+		VALIDATOR.isValidHealth(health);
+		this._health=health;
+	}
+	get count(){
+		return this._count;
+	}
+	set count(count){
+		VALIDATOR.isValidCount(count);
+		this._count=count;
+	}
+	get speed(){
+		return this._speed;
+	}
+	set speed(speed){
+		VALIDATOR.isValidSpeed(speed);
+		this._speed=speed;
+	}
+  }
+  class Commander extends Unit{
+	constructor(name,alignment,mana,spellBook,army){
+		super(name,alignment);
+		this.mana=mana;
+		this.spellbook=spellbook;
+		this.army=army;
+	}
+	get mana(){
+		return this._mana;
+	}
+	set mana(mana){
+		VALIDATOR.isPositiveNumber(mana);
+		this._mana=mana;
+	}
+	  get spellbook () {
+        return this._spellbook;
+      }
+      set spellbook(spellbook) {
+        this._spellbook = spellbook;
+      }
+      get army () {
+        return this._army;
+      }
+      set army(army) {
+        this._army = army;
+      }
 
-    const idGenerator = getIdGenerator();
+  }
+     const battlemanagerData = {
+      commanders: [],
+      armyUnitsObj: {},
+      armyUnits: [],
+    };
+	Array.prototype.filterByProperty=function(query,propName){
+		if(!query.hasOwnProperty(propName)){
+			return this;
+		}
+		const value=query[propName];
+		return this.filter(x=>x[propName]===value);
+	};
+    const battlemanager = {
+        getCommander:function(name, alignment, mana){
+			return new Commander(name, alignment, mana);
+        },
+        getArmyUnit:function(options){
+		  const { name, alignment, damage, health, count, speed } = options;
+        const unit = new ArmyUnit(name, alignment, damage, health, count, speed);
+        battlemanagerData.armyUnitsObj[unit.id] = unit;
+        battlemanagerData.armyUnits.push(unit);
+        return unit;
+        },
+        getSpell:function(name, manaCost, effect){
+			return new Spell(name, manaCost, effect);
+        },
+        addCommanders:function(...commanders){
+		battlemanagerData.commanders.push(...commanders);
+		return this;
+        },
+        addArmyUnitTo:function(commanderName, armyUnit){
+		battlemanagerData.commanders.find(c=>c.name===commanderName)
+		.army.push(armyUnit);
+		return this;
+        },
+		
+         addSpellsTo: function(commanderName, ...spells) {
+        try {  
+          battlemanagerData.commanders
+            .find(c => c.name === commanderName)
+            .spellbook.push(...(spells.map(s => new Spell(s.name, s.manaCost, s.effect))));
+        }
+        catch(e) {
+          throw Error(ERROR_MESSAGES.INVALID_SPELL_OBJECT);
+        }
 
-    const spell = {
-        get name() {
-            return this._name;
+        return this;
+      },
+        findCommanders:function(query){
+			return battlemanagerData.commanders().slice()
+			.filterByProperty(query,'name')
+			.filterByProperty(query,'alignment')
+			.sort((x,y)=>x.name.locateCompare(y.name));
         },
-        set name(value) {
-            validator.validateName(value);
+        findArmyUnitById:function(id){
+		return battlemanagerData.armyUnitsObj[id];
+        },
+        findArmyUnits:function(query){
+			return battlemanagerData.armyUnits.slice()
+			.filterByProperty(query,'id')
+			.filterByProperty(query,'name')
+			.filterByProperty(query,'alignment')
+			.sort((x,y)=>{
+				const spd=y.speed-x.speed;
+				if(spd==0){
+					return x.name.locateCompare(y.name);
+				}
+				return spd;
+			});
+        },
+        spellcast:function(casterName, spellName, targetUnitId) {
+		
+        },
+        battle:function(attacker, defender){
 
-            this._name = value;
-        },
-        get manaCost() {
-            return this._manaCost;
-        },
-        set manaCost(value) {
-            validator.validateMana(value);
-            this._manaCost = value;
-        },
-        get effect() {
-            return this._effect;
-        },
-        set effect(value) {
-            validator.validateEffect(value);
-
-            this._effect = value;
-        },
-        init(name, manaCost, effect) {
-            this.name = name;
-            this.manaCost = manaCost;
-            this.effect = effect;
-
-            return this;
         }
     };
-
-    const unit = {
-        get name() {
-            return this._name;
-        },
-        set name(value) {
-            validator.validateName(value);
-            this._name = value;
-        },
-        get alignment() {
-            return this._alignment;
-        },
-        set alignment(value) {
-            validator.validateAlignment(value);
-            this._alignment = value;
-        },
-        init(name, alignment) {
-            this.name = name;
-            this.alignment = alignment;
-
-            return this;
-        }
-    };
-
-    const armyUnit = (function (parent) {
-        const armyUnit = Object.create(parent);
-
-        Object.defineProperties(armyUnit, {
-            id: {
-                get () {
-                    return this._id;
-                }
-            },
-            count: {
-                get () {
-                    return this._count;
-                },
-                set (value) {
-                    validator.validateRange(value, 0, Infinity, ERROR_MESSAGES.INVALID_COUNT);
-                    this._count = value;
-                }
-            },
-            speed: {
-                get () {
-                    return this._speed;
-                },
-                set (value) {
-                    validator.validateRange(value, 0, 100, ERROR_MESSAGES.INVALID_SPEED);
-                    this._speed = value;
-                }
-            },
-            damage: {
-                get () {
-                    return this._damage;
-                },
-                set (value) {
-                    validator.validateRange(value, 0, 100, ERROR_MESSAGES.INVALID_DAMAGE);
-                    this._damage = value;
-                }
-            },
-            health: {
-                get () {
-                    return this._health;
-                },
-                set (value) {
-                    validator.validateRange(value, 0, 200, ERROR_MESSAGES.INVALID_HEALTH);
-
-                    this._health = value;
-                }
-            },
-            init: {
-                value (name, alignment, damage, health, count, speed) {
-                    this.damage = damage;
-                    this.health = health;
-                    this.count = count;
-                    this.speed = speed;
-                    this._id = idGenerator.next().value;
-                    return parent.init.call(this, name, alignment);
-                }
-            }
-        });
-
-        return armyUnit;
-    } (unit));
-
-    const commanderProto = (function (parent) {
-        const commander = Object.create(parent);
-
-        Object.defineProperties(commander, {
-            mana: {
-                get () {
-                    return this._mana;
-                },
-                set (value) {
-                    validator.validateMana(value);
-                    this._mana = value;
-                }
-            },
-            init: {
-                value (name, alignment, mana) {
-                    this.mana = mana;
-                    this.army = [];
-                    this.spellbook = [];
-                    return parent.init.call(this, name, alignment);
-                }
-            }
-        });
-
-        return commander;
-    } (unit));
-
-    const battlemanager = (function () {
-
-        function meetsRequirements(object, requirements) {
-
-            for (const req in requirements) {
-                if (object[req] !== requirements[req]) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        function compareStrings(first, second) {
-            return Number(first > second) - 0.5
-        }
-
-        function bySpeed(first, second) {
-            if (second.speed - first.speed) {
-                return second.speed - first.speed;
-            }
-
-            return compareStrings(first.name, second.name)
-        }
-
-        const commanders = [];
-
-        return {
-            getCommander(name, alignment, mana) {
-                return Object.create(commanderProto).init(name, alignment, mana);
-            },
-            getArmyUnit(options) {
-                const newUnit = Object.create(armyUnit).init(
-                    options.name,
-                    options.alignment,
-                    options.damage,
-                    options.health,
-                    options.count,
-                    options.speed
-                );
-
-                return newUnit;
-            },
-            getSpell(name, manaCost, effect) {
-                return Object.create(spell).init(name, manaCost, effect);
-            },
-            findCommanders(query) {
-                return commanders.filter(c => meetsRequirements(c, query)).sort((f, s) => compareStrings(f.name, s.name));
-            },
-            findArmyUnitById(id) {
-                for (const c of commanders) {
-                    const unit = c.army.find(u => u.id === id);
-
-                    if (unit) {
-                        return unit;
-                    }
-                }
-            },
-            findArmyUnits(query) {
-                const result = [];
-
-                for (const c of commanders) {
-                    const units = c.army.filter(u => meetsRequirements(u, query));
-                    if (units.length) {
-                        [].push.apply(result, units);
-                    }
-                }
-
-                return result.sort(bySpeed);
-            },
-            addCommanders(...newCommanders) {
-                [].push.apply(commanders, newCommanders);
-                return this;
-            },
-            addSpellsTo(commanderName, ...newSpells) {
-                const passedCommander = this.findCommanders({ name: commanderName })[0];
-
-                for(const spell of newSpells) {
-                    try {
-                        validator.validateName(spell.name);
-                        validator.validateMana(spell.manaCost);
-                        validator.validateEffect(spell.effect);
-                    } catch (error) {
-                        error.message = ERROR_MESSAGES.INVALID_SPELL_OBJECT;
-                        throw error;
-                    }
-                }
-
-                [].push.apply(passedCommander.spellbook, newSpells);
-
-                return this;
-            },
-            addArmyUnitTo(commanderName, newUnit) {
-                const passedCommander = this.findCommanders({ name: commanderName })[0];
-
-                passedCommander.army.push(newUnit);
-
-                return this;
-            },
-            spellcast(casterName, spellName, targetUnitId) {
-                const caster = this.findCommanders({ name: casterName })[0];
-
-                validator.validateNonNull(caster, 'Cannot cast with non-existant commander ' + casterName + '!');
-
-                const spell = caster.spellbook.find(s => s.name === spellName);
-
-                validator.validateNonNull(spell, casterName + ' does not know ' + spellName);
-                validator.validateCastManaCost(caster.mana, spell.manaCost);
-
-                const target = this.findArmyUnitById(targetUnitId);
-
-                validator.validateNonNull(target, ERROR_MESSAGES.TARGET_NOT_FOUND);
-
-                spell.effect(target);
-
-                caster.mana -= spell.manaCost;
-
-                return this;
-            },
-            battle(attacker, defender) {
-                
-                validator.validateBattleUnit(attacker, ERROR_MESSAGES.INVALID_BATTLE_PARTICIPANT);
-                validator.validateBattleUnit(defender, ERROR_MESSAGES.INVALID_BATTLE_PARTICIPANT);
-                const defenderCountAfterBattle = Math.ceil(((defender.health * defender.count) - (attacker.damage * attacker.count)) / defender.health);
-
-                if(defenderCountAfterBattle < 0) {
-                    defender.count = 0;
-                } else {
-                    defender.count = defenderCountAfterBattle;
-                }
-
-                return this;
-            }
-        };
-    } ());
 
     return battlemanager;
 }
-
 module.exports = solve;
